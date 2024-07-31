@@ -1,57 +1,62 @@
 '''
 Jayati Samar
-Last edited: 12/5/22
-Associated with: CS 5001 - Lab09 - Epic Battle Simulator
-Objective: This file contains tests for use with the Epic Battle Simulator lab - I used hit_points instead of HitPoints and set_weapon instead of giveWeapon.
+Last edited: 07/13/2024
+Associated with: CS6620: Cloud Computing - REST API Assignment
+Objective: This file contains tests for use with the REST API Assignment.
 '''
+import pytest
+from rest import create_app
 
-from character import Character
-from weapon import Weapon
-import unittest
+@pytest.fixture()
+def app():
+	app = create_app()
+	app.config.update({
+	"TESTING": True,
+	})
 
-class CharacterTest(unittest.TestCase):
-    def test_init_char1(self):
-        c1 = Character()
-        self.assertEqual(c1.name, "Ward")
-        self.assertEqual(c1.hit_points,5)
-        self.assertEqual(c1.strength,5)
-        
-    def test_init_char2(self):
-        c1 = Character("Jane", 1, 2)
-        self.assertEqual(c1.name, "Jane")
-        self.assertEqual(c1.hit_points,1)
-        self.assertEqual(c1.strength,2)
-        
-    def test_take_damage(self):
-        c1 = Character()
-        c1.take_damage(1)
-        self.assertEqual(c1.hit_points,4)
-        
-    def test_take_damage_zero(self):
-        c1 = Character()
-        c1.take_damage(25)
-        self.assertEqual(c1.hit_points,0)
-        self.assertEqual(c1.alive, False)
-        
-    def test_init_weapon(self):
-        w1 = Weapon()
-        self.assertEqual(w1.name, "generic dagger")
-        self.assertEqual(w1.strength, 1)
-        self.assertEqual(w1.durability,2)
-        
-    def test_give_weapon(self):
-        c1 = Character()
-        w1 = Weapon()
-        c1.set_weapon(w1)
-        self.assertEqual(c1.weapon.name, "generic dagger")
+    # other setup can go here
 
-    def test_weapon_durability(self):
-        w1 = Weapon("pool noodle", 1, 1)
-        w1.attack()
-        self.assertEqual(w1.attack(), 0)
+	yield app
+
+    # clean up / reset resources here
 
 
-def main():
-    unittest.main()
+@pytest.fixture()
+def client(app):
+	return app.test_client()
 
-main()
+
+def test_get_songs(client):
+	url = '/songs'
+	response = client.get(url)
+	assert response.status_code == 200
+          
+def test_add_song(client):
+	new_song = {"id": 4,
+		    "title":"Bethlehem Steel",
+		    "artist":"Delta Rae",
+		    "album":"After It All",
+		    "release":"04-07-2017",
+		    "spotify link":"https://open.spotify.com/track/0mwXgKxOrmSk2veQkLbWSJ?si=3b0d11732d134fda"
+		   }
+	url = '/songs'
+	response = client.post(url,json=new_song)
+	assert response.status_code == 201
+
+def test_update_song(client):
+	updated_song = {
+		"id": 2,
+        	"title":"Storm Song",
+		"artist":"PHILDEL",
+		"album":"The Disappearance of the Girl",
+		"release":"02-04-2014",
+		"spotify link":"https://open.spotify.com/track/5GTziJvDhtcCR6kCr6Ir8r?si=c3ef1d4ee015422a"
+	}
+	url = '/songs/2'
+	response = client.put(url, json=updated_song)
+	assert response.status_code == 200
+
+def test_delete_song(client):
+	url = '/songs/2'
+	response = client.delete(url)
+	assert response.status_code == 200
