@@ -7,6 +7,7 @@ Objective: This file sets up a simple CI/CD workflow.
 from flask import Flask, request, jsonify
 import boto3
 import os
+import json
 
 def create_app():
 	app = Flask(__name__)
@@ -14,12 +15,15 @@ def create_app():
 	
 app = create_app()
 
-# DynamoDB and S3 Configuration 
+# DynamoDB table and S3 bucket configuration 
 dynamodb = boto3.resource('dynamodb', endpoint_url='http://localstack:4566')
 s3 = boto3.client('s3', endpoint_url='http://localstack:4566')
 
 DYNAMODB_TABLE = os.environ.get('DYNAMODB_TABLE', 'SongTable')
+table = dynamodb.Table(DYNAMODB_TABLE)
 S3_BUCKET = os.environ.get('S3_BUCKET', 'song-bucket')
+
+
 
 # Create test data in the form of a song catalog.
 songs = [
@@ -51,19 +55,40 @@ songs = [
 
 @app.route('/songs', methods=['GET'])
 def get_songs():
-    return jsonify(songs), 200
+    response = table.scan()
+    return jsonify(response['Items']),200
 
 @app.route('/songs', methods=['POST'])
 def add_song():
     new_song = request.get_json()
-    songs.append(new_song)
+    
+	# Song added in DynamoDB
+    table.put_item(Item=new_song)
+    
+    # Song file created and added in S3
+    file_content = json.dumps(new_song)
+    file_name = f"{new_song['id']}.json"
+    s3.put_object(Bucket=S3_BUCKET,Key=file_name,Body=file_content)
+    
     return jsonify(new_song), 201
 
 @app.route('/songs/<int:id>', methods=['PUT'])
 def update_song(id):
+    song_id = {"ID":id}
     if id < len(songs):
         updated_song = request.json
-        songs[id] = updated_song
+        # Update song in DynamoDB
+        table.update_item(Key=song_id,UpdateExpression="set title=title,artist=artist,album=album,release=release,spotify_link=link",
+                          ExpressionAttributeValues={'title': updated_song['title'],
+                                                     'artist':updated_song['artist'],
+                                                     'album':updated_song['album'],
+                                                     'release':updated_song['release'],
+                                                     'link':updated_song['spotify link']},
+                                                     ReturnValues="UPDATED_NEW")
+        # Update song file in S3
+        file_name = f"{id}.json"
+        updated_file_content = json.dumps(updated_song)
+        s3.put_object(Bucket=S3_BUCKET,Key=file_name,Body=updated_file_content)
         return jsonify(updated_song), 200
     else:
         return "Song was not found.", 404
@@ -71,8 +96,10 @@ def update_song(id):
 
 @app.route("/songs/<int:id>", methods=["DELETE"])
 def delete_song(id):
+    song_id = {"ID":id}
     if id < len(songs):
-        deleted_song = songs.pop(id)
+        response = table.delete_item(Key=song_id,ReturnValues="ALL_OLD")
+        deleted_song = response.get('Attributes', None)
         return jsonify(deleted_song), 200
     else:
         return "Song was not found", 404
