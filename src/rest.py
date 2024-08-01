@@ -16,8 +16,8 @@ def create_app():
 app = create_app()
 
 # DynamoDB table and S3 bucket configuration 
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localstack:4566')
-s3 = boto3.client('s3', endpoint_url='http://localstack:4566')
+dynamodb = boto3.resource('dynamodb', endpoint_url='http://localstack:4566',region_name='us-east-1')
+s3 = boto3.client('s3', endpoint_url='http://localstack:4566',region_name='us-east-1')
 
 DYNAMODB_TABLE = os.environ.get('DYNAMODB_TABLE', 'SongTable')
 table = dynamodb.Table(DYNAMODB_TABLE)
