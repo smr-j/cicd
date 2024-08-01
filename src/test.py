@@ -1,8 +1,8 @@
 '''
 Jayati Samar
-Last edited: 07/13/2024
-Associated with: CS6620: Cloud Computing - REST API Assignment
-Objective: This file contains tests for use with the REST API Assignment.
+Last edited: 07/31/2024
+Associated with: CS6620: Cloud Computing - CI/CD Assignment
+Objective: This file contains tests for use with the CI/CD Assignment.
 '''
 import pytest
 from rest import create_app
@@ -30,6 +30,17 @@ def test_get_songs(client):
 	url = '/songs'
 	response = client.get(url)
 	assert response.status_code == 200
+
+def test_get_specific_song(client):
+	url = '/songs/1'
+	response = client.get(url)
+	assert response.status_code == 200
+	
+def test_get_nonexistent_song(client):
+	url = '/songs/1200'
+	response = client.get(url)
+	assert response.status_code == 404
+
           
 def test_add_song(client):
 	new_song = {"id": 4,

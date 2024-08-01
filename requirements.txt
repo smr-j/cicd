@@ -1,2 +1,4 @@
 flask
 pytest
+boto3
+os
