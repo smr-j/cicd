@@ -86,6 +86,10 @@ def get_songs():
 @app.route('/songs', methods=['POST'])
 def add_song():
     new_song = request.get_json()
+    # Check if the song already exists by ID
+    response = table.get_item(Key={'id': new_song['id']})
+    if 'Item' in response:
+        return jsonify({'error': 'Song ID already exists'}), 409
     
 	# Song added in DynamoDB
     table.put_item(Item=new_song)

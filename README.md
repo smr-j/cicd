@@ -15,4 +15,6 @@ This assignment was a huge struggle for me. I understand some of the separate pi
 
 ## References
 
-Sources consulted while trying to figure this out largely include the following in addition to Docker, Github, and Flask documentation: 
+Sources consulted while trying to figure this out largely include the following in addition to Docker, Localstack, Boto3, and AWS documentation: 
+
+https://stackoverflow.com/questions/3825990/http-response-code-for-post-when-resource-already-exists

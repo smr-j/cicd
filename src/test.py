@@ -7,7 +7,39 @@ Objective: This file contains tests for use with the CI/CD Assignment.
 import pytest
 import os
 import boto3
+import json
 from rest_items import create_app
+
+
+
+
+default_songs = [
+        {
+            "id": 1,
+            "title": "Another Round",
+            "artist": "Edie Brickell & Steve Martin",
+            "album": "So Familiar",
+            "release": "12-01-2015",
+            "spotify link": "https://open.spotify.com/track/1HKz0H8Tzxol2ktt7Y4ww0?si=8064e9d8d3dc4a09"
+        },
+        {
+            "id": 2,
+            "title": "Pressure",
+            "artist": "Billy Joel",
+            "album": "The Nylon Curtain",
+            "release": "06-23-1982",
+            "spotify link": "https://open.spotify.com/track/3LqvmDtXWXjF7fg8mh8iZh?si=3742df9928c44f3c"
+        },
+        {
+            "id": 3,
+            "title": "Golden Dandelions",
+            "artist": "Barns Courtney",
+            "album": "The Attractions of Youth",
+            "release": "09-29-2017",
+            "spotify link": "https://open.spotify.com/track/78ZsfJB762SXFfLK96mBmC?si=df7ff6d61f5c4105"
+        }
+    ]
+
 
 @pytest.fixture()
 def app():
@@ -34,11 +66,17 @@ def app():
 	table = dynamodb.Table(DYNAMODB_TABLE)
 	S3_BUCKET = os.environ.get('S3_BUCKET', 'song_bucket')
     # other setup can go here
+	for song in default_songs():
+		table.put_item(Item=song)
+		s3.put_object(Bucket=S3_BUCKET,Key=f"{song['id']}.json", Body=json.dumps(song))
 
 	yield app
 
     # clean up / reset resources here
-
+	for song in default_songs():
+		table.delete_item(Key={"id": song['id']})
+		s3.delete_object(Bucket=S3_BUCKET, Key=f"{song['id']}.json")
+	
 
 @pytest.fixture()
 def client(app):
@@ -86,6 +124,19 @@ def test_update_song(client):
 	url = '/songs/2'
 	response = client.put(url, json=updated_song)
 	assert response.status_code == 200
+
+def test_duplicate_song(client):
+    duplicate_song = {
+        "id": 1,
+        "title": "Another Round",
+        "artist": "Edie Brickell & Steve Martin",
+        "album": "So Familiar",
+        "release": "12-01-2015",
+        "spotify link": "https://open.spotify.com/track/1HKz0H8Tzxol2ktt7Y4ww0?si=8064e9d8d3dc4a09"
+    }
+    url = '/songs'
+    response = client.post(url, json=duplicate_song)
+    assert response.status_code == 409
 
 def test_delete_song(client):
 	url = '/songs/2'
