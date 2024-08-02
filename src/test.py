@@ -5,9 +5,9 @@ Associated with: CS6620: Cloud Computing - CI/CD Assignment
 Objective: This file contains tests for use with the CI/CD Assignment.
 '''
 import pytest
-from rest import create_app
 import os
 import boto3
+from resting_code import create_app
 
 @pytest.fixture()
 def app():
