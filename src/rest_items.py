@@ -1,6 +1,6 @@
 '''
 Jayati Samar
-Last edited: 07/31/2024
+Last edited: 08/1/2024
 CS6620: Cloud Computing - CI/CD Assignment
 Objective: This file sets up a simple CI/CD workflow.
 '''
@@ -16,12 +16,23 @@ def create_app():
 app = create_app()
 
 # DynamoDB table and S3 bucket configuration 
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localstack:4566',region_name='us-east-1')
-s3 = boto3.client('s3', endpoint_url='http://localstack:4566',region_name='us-east-1')
+aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
+aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+aws_region = os.environ.get('AWS_DEFAULT_REGION')
+dynamodb = boto3.resource('dynamodb', 
+                          endpoint_url='http://localstack:4566',
+                          aws_access_key_id=aws_access_key_id,
+                          aws_secret_access_key=aws_secret_access_key,
+                          region_name=aws_region)
+s3 = boto3.client('s3', 
+                  endpoint_url='http://localstack:4566',
+                  aws_access_key_id=aws_access_key_id,
+                  aws_secret_access_key=aws_secret_access_key,
+                  region_name=aws_region)
 
 DYNAMODB_TABLE = os.environ.get('DYNAMODB_TABLE', 'SongTable')
 table = dynamodb.Table(DYNAMODB_TABLE)
-S3_BUCKET = os.environ.get('S3_BUCKET', 'song-bucket')
+S3_BUCKET = os.environ.get('S3_BUCKET', 'song_bucket')
 
 
 # Create test data in the form of a song catalog.

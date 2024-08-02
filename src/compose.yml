@@ -10,3 +10,6 @@ services:
     environment:
       - DYNAMODB_TABLE=SongTable
       - S3_BUCKET=song_bucket
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=default
+      - AWS_SECRET_ACCESS_KEY=secret
