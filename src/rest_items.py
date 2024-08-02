@@ -24,36 +24,6 @@ table = dynamodb.Table(DYNAMODB_TABLE)
 S3_BUCKET = os.environ.get('S3_BUCKET', 'song-bucket')
 
 
-
-# Create test data in the form of a song catalog.
-songs = [
-    {
-        "id": 1,
-        "title":"Another Round",
-        "artist":"Edie Brickell & Steve Martin",
-        "album":"So Familiar",
-        "release":"12-01-2015",
-        "spotify link":"https://open.spotify.com/track/1HKz0H8Tzxol2ktt7Y4ww0?si=8064e9d8d3dc4a09"
-    },
-    {
-        "id": 2,
-        "title":"Pressure",
-        "artist":"Billy Joel",
-        "album":"The Nylon Curtain",
-        "release":"06-23-1982",
-        "spotify link":"https://open.spotify.com/track/3LqvmDtXWXjF7fg8mh8iZh?si=3742df9928c44f3c"
-    },
-	{
-        "id": 3,
-        "title":"Golden Dandelions",
-        "artist":"Barns Courtney",
-        "album":"The Attractions of Youth",
-        "release":"09-29-2017",
-        "spotify link":"https://open.spotify.com/track/78ZsfJB762SXFfLK96mBmC?si=df7ff6d61f5c4105"
-	}	
-]
-
-
 # Create test data in the form of a song catalog.
 songs = [
     {
