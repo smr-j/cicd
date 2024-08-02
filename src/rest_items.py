@@ -16,8 +16,8 @@ def create_app():
 app = create_app()
 
 # DynamoDB table and S3 bucket configuration 
-aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
-aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID','default')
+aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY','secret')
 aws_region = os.environ.get('AWS_DEFAULT_REGION','us-east-1')
 dynamodb = boto3.resource('dynamodb', 
                           endpoint_url='http://localstack:4566',
