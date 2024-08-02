@@ -7,7 +7,7 @@ Objective: This file contains tests for use with the CI/CD Assignment.
 import pytest
 import os
 import boto3
-from resting_code import create_app
+from rest_items import create_app
 
 @pytest.fixture()
 def app():
