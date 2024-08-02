@@ -62,7 +62,7 @@ songs = [
         "spotify link": "https://open.spotify.com/track/78ZsfJB762SXFfLK96mBmC?si=df7ff6d61f5c4105"
     }
 ]
-
+'''
 def initializer():
     for song in songs:
         # Add song to DynamoDB
@@ -75,6 +75,7 @@ def initializer():
 
 # Initialize the database and S3 with the songs
 initializer()
+'''
 
 
 @app.route('/songs', methods=['GET'])
