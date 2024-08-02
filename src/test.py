@@ -6,6 +6,8 @@ Objective: This file contains tests for use with the CI/CD Assignment.
 '''
 import pytest
 from rest import create_app
+import os
+import boto3
 
 @pytest.fixture()
 def app():
@@ -13,6 +15,13 @@ def app():
 	app.config.update({
 	"TESTING": True,
 	})
+	# DynamoDB table and S3 bucket configuration 
+	dynamodb = boto3.resource('dynamodb', endpoint_url='http://localstack:4566',region_name='us-east-1')
+	s3 = boto3.client('s3', endpoint_url='http://localstack:4566',region_name='us-east-1')
+
+	DYNAMODB_TABLE = os.environ.get('DYNAMODB_TABLE', 'SongTable')
+	table = dynamodb.Table(DYNAMODB_TABLE)
+	S3_BUCKET = os.environ.get('S3_BUCKET', 'song-bucket')
 
     # other setup can go here
 
@@ -53,6 +62,7 @@ def test_add_song(client):
 	url = '/songs'
 	response = client.post(url,json=new_song)
 	assert response.status_code == 201
+
 
 def test_update_song(client):
 	updated_song = {
