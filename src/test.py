@@ -40,7 +40,6 @@ default_songs = [
         }
     ]
 
-
 @pytest.fixture()
 def app():
 	app = create_app()
@@ -82,6 +81,17 @@ def app():
 def client(app):
 	return app.test_client()
 
+def assert_matching_entries(song_id, s3, table):
+    # Check the song in DynamoDB
+    db_response = table.get_item(Key={'id': song_id})
+    dynamodb_song = db_response.get('Item', None)
+
+    # Check the song in S3
+    s3_response = s3.get_object(Bucket=os.environ.get('S3_BUCKET', 'song_bucket'), Key=f"{song_id}.json")
+    s3_song = json.loads(s3_response['Body'].read().decode('utf-8'))
+
+    assert dynamodb_song == s3_song
+
 
 def test_get_songs(client):
 	url = '/songs'
@@ -92,12 +102,22 @@ def test_get_specific_song(client):
 	url = '/songs/1'
 	response = client.get(url)
 	assert response.status_code == 200
+	assert_matching_entries(1, client.application.s3, client.application.table)
 	
 def test_get_nonexistent_song(client):
 	url = '/songs/1200'
 	response = client.get(url)
 	assert response.status_code == 404
-
+	
+def test_get_no_parameters(client):
+	url = '/songs/'
+	response = client.get(url)
+	assert response.status_code == 404
+	
+def test_get_bad_parameters(client):
+	url = 'songs/invalid'
+	response = client.get(url)
+	assert response.status_code == 404
           
 def test_add_song(client):
 	new_song = {"id": 4,
@@ -110,6 +130,9 @@ def test_add_song(client):
 	url = '/songs'
 	response = client.post(url,json=new_song)
 	assert response.status_code == 201
+	
+	# Check if DynamoDB and S3 match
+	assert_matching_entries(new_song['id'], client.application.s3, client.application.table)
 
 
 def test_update_song(client):
@@ -124,6 +147,22 @@ def test_update_song(client):
 	url = '/songs/2'
 	response = client.put(url, json=updated_song)
 	assert response.status_code == 200
+	# Check if DynamoDB and S3 match
+	assert_matching_entries(updated_song['id'], client.application.s3, client.application.table)
+
+def test_update_nonexistent_song(client):
+	updated_song = {
+        "id": 999,
+        "title": "Another Round",
+        "artist": "Edie Brickell & Steve Martin",
+        "album": "So Familiar",
+        "release": "12-01-2015",
+        "spotify link": "https://open.spotify.com/track/1HKz0H8Tzxol2ktt7Y4ww0?si=8064e9d8d3dc4a09"
+	}
+	url = '/songs/999'
+	response = client.put(url,json=updated_song)
+	assert response.status_code == 404
+
 
 def test_duplicate_song(client):
     duplicate_song = {
@@ -136,9 +175,22 @@ def test_duplicate_song(client):
     }
     url = '/songs'
     response = client.post(url, json=duplicate_song)
-    assert response.status_code == 409
+    assert response.status_code == 409 
 
 def test_delete_song(client):
 	url = '/songs/2'
 	response = client.delete(url)
 	assert response.status_code == 200
+    # Ensuring the song is deleted from both DynamoDB and S3
+	assert client.application.table.get_item(Key={"id": 2}).get('Item', None) is None
+	try:
+		client.application.s3.get_object(Bucket=os.environ.get('S3_BUCKET', 'song_bucket'), Key='2.json')
+		raise AssertionError("The song file still exists in S3 after deletion.")
+	except client.application.s3.exceptions.NoSuchKey:
+		pass  # This is expected
+	
+def test_delete_nonexistent_song(client):
+    url = '/songs/999'
+    response = client.delete(url)
+    assert response.status_code == 404
+    assert response.get_json() == "Song was not found."

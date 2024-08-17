@@ -1,4 +1,4 @@
-# Cloud Computing : CI/CD Workflows
+# Cloud Computing : CI/CD Workflows - Updated
 
 The general structure of this repo is taken from the prior assignment, although I'm questioning whether I set this up correctly as per the assignment requests.
 This repository currently contains code files for a simple CI/CD workflow, related tests, and Dockerfiles for both code files, in addition to a docker-compose.yml.
@@ -15,9 +15,10 @@ This assignment was a huge struggle for me. I understand the different pieces of
 
 ## References
 
-Sources consulted while trying to figure this out largely include the following in addition to Docker, Localstack, Boto3, and AWS documentation: 
+Sources consulted while trying to figure this out largely include the following in addition to Docker, Localstack, Boto3, Pytest, and AWS documentation: 
 
 https://stackoverflow.com/questions/3825990/http-response-code-for-post-when-resource-already-exists
 https://stackoverflow.com/questions/33297172/boto3-error-botocore-exceptions-nocredentialserror-unable-to-locate-credential
 https://whattodevnow.medium.com/using-localstack-with-docker-compose-to-mock-aws-services-bb25a5b01d4b
-https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/
+https://testdriven.io/blog/flask-pytest/
